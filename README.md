@@ -55,6 +55,16 @@ The various mode supported by my remote control are:
 * Automatic
 * Dry
 
+Only the first 4 bits of this byte is changing:
+
+```
+09   AUTO
+29   DRY
+39   COLD
+49   HEAT
+69   FAN
+```
+
 ### Temperature
 My remote control supports temperature between 10 and 30 degrees. Coding of temperature is quite easy to reverse: take the temperature in Celsius, multiply by 2, and code it in heax.
 For example:
@@ -99,5 +109,16 @@ Few examples
 ```
 
 ### Checksum
+The last byte of frame is a checksum. All previous bytes are added and only the 2 bytes are kept. If you compute it with modern languages, simply apply 0xFF mask.
+
+Example with this frame:
+```
+11 da 27 00 00 49 3c 00 50 00 00 06 60 00 00 c1 80 00
+```
+
+```
+11 + +da + 27 + 00 + 00 + 49 + 3c + 00 + 50 + 00 + 00 + 06 + 60 + 00 + 00 + c1 + 80 + 00 = 38e
+03 8e | 00 ff = 8e 
+```
 
 
