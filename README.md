@@ -65,6 +65,8 @@ Only the first 4 bits of this byte is changing:
 69   FAN
 ```
 
+**Nota bene:** in *DRY* and *FAN* mode, the temperature transmitted is 25°C (it is not relevant).
+
 ### Temperature
 My remote control supports temperature between 10 and 30 degrees. Coding of temperature is quite easy to reverse: take the temperature in Celsius, multiply by 2, and code it in heax.
 For example:
