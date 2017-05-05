@@ -19,7 +19,7 @@ Each remote-control transmission produces 3 frames. The 2 first frames are X byt
 The IR protocol is using Pulse Distance Encoding. This was guessed by observing the HIGH states duration is the same all the time.
 Measures made with Arduino are as follow (not necessarily accurate, Arduino is not a precise logic analyzer!).
 
-| STATE | Duration (microseconds) |
+| State | Duration (microseconds) |
 | ------------- | -----:|
 | HIGH      | 412-444 |
 | LOW LONG (1)  | 1496-1536 |
@@ -27,7 +27,10 @@ Measures made with Arduino are as follow (not necessarily accurate, Arduino is n
 
 Bytes are coded using Least Significant Bit (LSB).
 
-11 da 27 00 00 49 3c 00 50 00 00 06 60 00 00 c1 80 00 8e 
+```
+11 da 27 00 00 49 3c 00 50 00 00 06 60 00 00 c1 80 00 8e
+```
+
 ```
 00:     11 da 27 00 00 49 3c 00 
 08:     50 00 00 06 60 00 00 c1 
@@ -44,5 +47,51 @@ Offset  Description         Length     Example        Decoding
 12      Checksum            1          8e             Add all previous bytes and do a OR with mask 0xff
 ```
 
+### Mode
+The various mode supported by my remote control are:
+* Heater
+* Cooler
+* Fan
+* Automatic
+* Dry
+
+### Temperature
+My remote control supports temperature between 10 and 30 degrees. Coding of temperature is quite easy to reverse: take the temperature in Celsius, multiply by 2, and code it in heax.
+For example:
+
+```
+Desired temperature in °C:     20
+Multiply it by 2:              40
+Convert it in hex:           0x28
+```
+
+### Fan Speed, Swing
+The remote control supports 3 modes:
+* Manual from 1 to 5
+* Silent
+* Auto
+
+The remote also has a "Swing" mode.
+
+The top 4 bits are used to code the fan-mode, and the 4 last bits are used to code the swing function.
+
+Modes:
+```
+3    Fan 1/5
+4    Fan 2/5
+5    Fan 3/5
+6    Fan 4/5
+7    Fan 5/5
+A    Automatic	
+D    Silent	
+```
+
+Swing:
+```
+0    Swing disabled
+F    Swing enabled
+```
+
+### Checksum
 
 
