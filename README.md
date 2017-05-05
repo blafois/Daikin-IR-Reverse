@@ -92,6 +92,12 @@ Swing:
 F    Swing enabled
 ```
 
+Few examples
+```
+3F   Fan 1/5 and Swing enabled
+70   Fan 5/5 and Swing disabled
+```
+
 ### Checksum
 
 
