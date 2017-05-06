@@ -32,17 +32,34 @@ Bytes are coded using Least Significant Bit (LSB).
 
 Based on multiple tests, here is what I was able to determine on the protocol used by Daikin.
 
-### Init Frames
+### Frame 1 (Code 0xc5)
 
+The first frame is always the same, except when "comfort" mode is enabled.
 ```
 11 da 27 00 c5 00 00 d7 
 ```
 
 ```
+Offset  Description            Length     Example        Decoding
+========================================================================================================
+0-3     Header                 4          11 da 27 00
+6       Comfort mode           1          10
+7       Checksum               1          d7	
+```
+
+Comfort mode:
+```
+11 da 27 00 c5 00 10 e7       Comfort mode ENABLED
+11 da 27 00 c5 00 00 d7       Comfort mode DISABLED
+```
+
+### Frame 2 (Code 0x42)
+
+```
 11 da 27 00 42 00 00 54 
 ```
 
-### Settings Frame
+### Frame 3 (Code 0x00)
 
 Sample frame transmitted:
 ```
@@ -57,13 +74,17 @@ Sample frame transmitted:
 
 Frame specification:
 ```
-Offset  Description         Length     Example        Decoding
+Offset  Description            Length     Example        Decoding
 ========================================================================================================
-0-3     Header              4          88 5b e4 00	
-5       Mode                1          49             49 = Heat.
-6       Temperature         1          30             It is temperature x2. 0x30 = 48 / 2 = 24°C
-8       Fan Speed + Swing   1          30             30 = Fan 1/5 No Swing. 3F = Fan 1/5 + Swing. 
-12      Checksum            1          8e             Add all previous bytes and do a OR with mask 0xff
+00-03   Header                 4          11 da 27 00
+04      Message Identifier     1          00	
+05      Mode, On/Off, Timer    1          49             49 = Heat, On, No Timer
+06      Temperature            1          30             It is temperature x2. 0x30 = 48 / 2 = 24°C
+08      Fan / Swing / Comfort  1          30             30 = Fan 1/5 No Swing. 3F = Fan 1/5 + Swing. 
+0a-0b   Timer delay            2          b4 00            
+0d      Powerful               1          01             Powerful enabled
+10      Econo                  1          84             4 last bits
+12      Checksum               1          8e             Add all previous bytes and do a OR with mask 0xff
 ```
 
 #### Mode
@@ -77,14 +98,38 @@ The various mode supported by my remote control are:
 Only the first 4 bits of this byte is changing:
 
 ```
-09   AUTO
-29   DRY
-39   COLD
-49   HEAT
-69   FAN
+0-   AUTO
+2-   DRY
+3-   COLD
+4-   HEAT
+6-   FAN
 ```
 
 **Nota bene:** in *DRY* and *FAN* mode, the temperature transmitted is 25°C (it is not relevant).
+
+#### Timers and Power
+
+To manage the On/Off state as well as timer modes, the last 4 bits are used.
+
+```
+Bit     Value    Description
+=======================================
+0       8        Always "1"        
+1       4        Timer OFF enabled
+2       2        Timer ON enabled
+3       1        Current State. 1 = On, 0 = Off
+```
+
+The timer mode can be "delayed power on" or "delayed power off". The timer delay is explained later.
+
+Few examples:
+```
+-8   Off, No timer
+-9   On, No timer
+-a   Off, Timer "On"
+-c   Off, Timer "Off"
+-d   On, Timer "Off"
+```
 
 #### Temperature
 My remote control supports temperature between 10 and 30 degrees. Coding of temperature is quite easy to reverse: take the temperature in Celsius, multiply by 2, and code it in heax.
@@ -96,7 +141,7 @@ Multiply it by 2:              40
 Convert it in hex:           0x28
 ```
 
-#### Fan Speed, Swing
+#### Fan Speed, Swing, Commfort
 The remote control supports 3 modes:
 * Manual from 1 to 5
 * Silent
@@ -123,10 +168,46 @@ Swing:
 F    Swing enabled
 ```
 
+The comfort mode automatically sets the position of air flow. It also sets the fan speed to Automatic.
+```
+
+```
+
 Few examples
 ```
 3F   Fan 1/5 and Swing enabled
 70   Fan 5/5 and Swing disabled
+```
+
+#### Timer
+
+There are 2 times: timer for Power On and timer for Power Off.
+The type of timer is coded at offset 5
+
+The timer delay is in minutes and is positioned on offsets 0a and 0b.
+Few examples:
+```
+4H = 4 * 60 = 240 minutes = 0x00f0. This will be coded as f0 00
+5H = 5 * 60 = 300 minutes = 0x012c. This will be coded as 2c 01
+```
+
+#### Powerful
+
+The Powerful mode sets the AC at his maximum capacity for 20 minutes, and then reverts back to the previous state.
+The previous state is transmitted in the frame. So basically, the Powerful state is just 1 bit in addition to a normal frame.
+
+For example, the following frame will set the powerful mode during 20 minutes in heat state, and then will heat normally at 20°C with fan speed 3:
+```
+11 da 27 00 00 49 28 00 50 00 00 06 60 01 00 c1 80 00 7b 
+```
+
+#### Econo
+
+The 4 last bits are used to determine if econo mode is enabled or not
+
+```
+80   Econo is DISABLED
+84   Econo is ENABLED
 ```
 
 #### Checksum
