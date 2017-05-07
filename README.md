@@ -80,7 +80,7 @@ Offset  Description            Length     Example        Decoding
 04      Message Identifier     1          00	
 05      Mode, On/Off, Timer    1          49             49 = Heat, On, No Timer
 06      Temperature            1          30             It is temperature x2. 0x30 = 48 / 2 = 24°C
-08      Fan / Swing / Comfort  1          30             30 = Fan 1/5 No Swing. 3F = Fan 1/5 + Swing. 
+08      Fan / Swing            1          30             30 = Fan 1/5 No Swing. 3F = Fan 1/5 + Swing. 
 0a-0c   Timer delay            3          3c 00 60           
 0d      Powerful               1          01             Powerful enabled
 10      Econo                  1          84             4 last bits
@@ -141,7 +141,7 @@ Multiply it by 2:              40
 Convert it in hex:           0x28
 ```
 
-#### Fan Speed, Swing, Commfort
+#### Fan Speed, Swing
 The remote control supports 3 modes:
 * Manual from 1 to 5
 * Silent
@@ -166,11 +166,6 @@ Swing:
 ```
 0    Swing disabled
 F    Swing enabled
-```
-
-The comfort mode automatically sets the position of air flow. It also sets the fan speed to Automatic.
-```
-
 ```
 
 Few examples
