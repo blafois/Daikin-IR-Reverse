@@ -195,7 +195,7 @@ Few examples:
 ```
 
 In Java, this can be decoded using the following code snippet:
-```
+```Java
 int timerDuration = (0x100 * message[0xb] + message[0xa]) / 60;
 ```
 
@@ -210,7 +210,7 @@ Few examples:
 In Java, this can be decoded using the following code snippet:
 ```Java
 int timerDuration = ((message[0xc] << 4) | (message[0xb] >> 4)) / 60;
-``
+```
 
 
 #### Powerful
