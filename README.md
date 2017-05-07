@@ -81,7 +81,7 @@ Offset  Description            Length     Example        Decoding
 05      Mode, On/Off, Timer    1          49             49 = Heat, On, No Timer
 06      Temperature            1          30             It is temperature x2. 0x30 = 48 / 2 = 24°C
 08      Fan / Swing / Comfort  1          30             30 = Fan 1/5 No Swing. 3F = Fan 1/5 + Swing. 
-0a-0b   Timer delay            2          b4 00            
+0a-0c   Timer delay            3          3c 00 60           
 0d      Powerful               1          01             Powerful enabled
 10      Econo                  1          84             4 last bits
 12      Checksum               1          8e             Add all previous bytes and do a OR with mask 0xff
@@ -159,7 +159,7 @@ Modes:
 6    Fan 4/5
 7    Fan 5/5
 A    Automatic	
-D    Silent	
+B    Silent	
 ```
 
 Swing:
@@ -184,12 +184,34 @@ Few examples
 There are 2 times: timer for Power On and timer for Power Off.
 The type of timer is coded at offset 5
 
-The timer delay is in minutes and is positioned on offsets 0a and 0b.
+The timer delay position and coding defers depending of timer type.
+
+For Timer *ON*, the delay is on offset 0a and 0b, with the following coding:
+
 Few examples:
 ```
 4H = 4 * 60 = 240 minutes = 0x00f0. This will be coded as f0 00
 5H = 5 * 60 = 300 minutes = 0x012c. This will be coded as 2c 01
 ```
+
+In Java, this can be decoded using the following code snippet:
+```
+int timerDuration = (0x100 * message[0xb] + message[0xa]) / 60;
+```
+
+For Timer *OFF*, the delay is on offset 0b and 0c, with the following coding:
+
+Few examples:
+```
+1H = 1 * 60 = 60 minutes = 0x003C. This will be coded as c6 03
+5H = 5 * 60 = 300 minutes = 0x012c. This will be coded as 2c 01
+```
+
+In Java, this can be decoded using the following code snippet:
+```Java
+int timerDuration = ((message[0xc] << 4) | (message[0xb] >> 4)) / 60;
+``
+
 
 #### Powerful
 
