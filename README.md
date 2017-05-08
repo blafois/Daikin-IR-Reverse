@@ -13,18 +13,18 @@ The Arduino sketch is very basic, and stores the duration in microseconds of sta
 
 ![Arduino Wiring](https://github.com/blafois/Daikin-IR-Reverse/raw/master/doc/Analysis-Sketch.png)
 
-## Analysis
+## Analysis (decoding)
 
 Each remote-control transmission produces 3 frames. The 2 first frames are 8 bytes long while the 3rd one is 19 bytes.
 
 The IR protocol is using Pulse Distance Encoding. This was guessed by observing the HIGH states duration is the same all the time.
 Measures made with Arduino are as follow (not necessarily accurate, Arduino is not a precise logic analyzer!).
 
-| State | Duration (microseconds) |
-| ------------- | -----:|
-| HIGH      | 412-444 |
-| LOW LONG (1)  | 1496-1536 |
-| LOW SHORT (0) | 412-444 |
+| State         | Minimum (us) | Maximum (us) | Average (us) |
+| ------------- | ------------ | ------------ | ------------ |
+| HIGH          | 424          | 500          | 452          |
+| LOW LONG (1)  | 1264         | 1300         | 1286         |
+| LOW SHORT (0) | 396          | 436          | 419          |
 
 Bytes are coded using Least Significant Bit (LSB).
 
@@ -244,4 +244,10 @@ Example with this frame:
    = 8e 
 ```
 
+### Build a message from scratch
+
+```
+|   header    | Msg Id | Mode | Temp | Fixed | Fan | Fixed |  Timers  | Pwrful | Fixed |                         | Fixed | Checksum |
+| 11 da 27 00 |   00   |  xx  |  xx  |   00  |  xx |   00  | xx xx xx |   0x   |   00  | 8x |   00  |    xx    |
+```
 
